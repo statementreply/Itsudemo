@@ -12,6 +12,8 @@
 
 #include <stdint.h>
 
+using namespace TEXB;
+
 TextureImage* TextureBank::FetchImage(std::string ImageName)
 {
 	std::map<std::string,uint32_t>::iterator i=ImageList_Names.find(ImageName);

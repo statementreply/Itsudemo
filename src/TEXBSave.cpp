@@ -18,6 +18,8 @@
 
 #include <zlib.h>
 
+using namespace TEXB;
+
 int32_t TextureBank::SaveToMemory(uint8_t*& Memory,size_t* MemorySize,uint32_t CompressLevel)
 {
 	if(MemorySize==NULL) return EINVAL;
@@ -151,7 +153,7 @@ int32_t TextureBank::SaveToMemory(uint8_t*& Memory,size_t* MemorySize,uint32_t C
 		temp_int=RawImageWidth*RawImageHeight*4;
 		sstream.write(reinterpret_cast<char*>(RawImage),temp_int);
 	}
-	
+
 	temp_int=static_cast<int>(sstream.tellp())-8;
 	prebuf[0]=temp_int>>24;
 	prebuf[1]=(temp_int>>16)&255;

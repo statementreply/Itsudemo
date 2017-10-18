@@ -22,6 +22,8 @@
 
 #include <zlib.h>
 
+using namespace TEXB;
+
 uint8_t GetBytePerPixel(uint16_t TexbFlags)
 {
 	uint8_t iff=TexbFlags&7;
@@ -65,7 +67,7 @@ TextureBank* TextureBank::FromMemory(uint8_t* _mem,size_t _n)
 	memory_buffer.seekg(4,std::ios::cur);
 
 	texb=new TextureBank();
-	
+
 	// TEXB Name without T prefix and extension
 	uint16_t temp_short=0;
 	memory_buffer.read(reinterpret_cast<char*>(prebuf),2);
@@ -74,7 +76,7 @@ TextureBank* TextureBank::FromMemory(uint8_t* _mem,size_t _n)
 	memory_buffer.read(temp_buffer,temp_short);
 	texb->Name=std::string(temp_buffer);
 	texb->Name=texb->Name.substr(1,texb->Name.find(".texb")-1);	// Discard .texb
-	
+
 	// Width & Height
 	uint16_t tWidth,tHeight;
 	memory_buffer.read(reinterpret_cast<char*>(prebuf),4);
@@ -213,10 +215,10 @@ TextureBank* TextureBank::FromMemory(uint8_t* _mem,size_t _n)
 				// Cannot initialize ZLib
 				goto FailAndExit;
 			}
-			
+
 			uint32_t infsize=tWidth*tHeight*GetBytePerPixel(TexbFlags);
 			uint8_t* inf=LIBTEXB_ALLOC(uint8_t,infsize);
-			
+
 			zstate.avail_in=dataSize;
 			zstate.next_in=rawData;
 			zstate.avail_out=infsize;
@@ -257,7 +259,7 @@ TextureBank* TextureBank::FromMemory(uint8_t* _mem,size_t _n)
 	{
 		TextureImage* timg=texb->ImageList_Id[i];
 		texb->ImageList_Names[timg->Name]=i;
-		
+
 		uint32_t* Vrtx=texb->VertexIndexUVs[i];
 		Point v[4]={
 			{Vrtx[0]/65536,Vrtx[1]/65536},

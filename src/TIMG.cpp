@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace TEXB;
+
 TextureImage::TextureImage(uint32_t width,uint32_t height,uint8_t* raw_image)
 {
 	uint32_t size=width*height*4;

@@ -21,6 +21,8 @@
 #include <lodepng.h>
 #include <zlib.h>
 
+using namespace TEXB;
+
 struct AppendStringVisitor:public TCLAP::Visitor
 {
 	std::string append;
@@ -75,7 +77,7 @@ void show_information_once(TextureBank* texb,const std::string path)
 {
 	static bool ever_here=false;
 	if(ever_here) return;
-	
+
 	std::vector<TextureImage*> timg_list=texb->FetchAll();
 	TextureImage* temp_timg=NULL;
 
@@ -88,7 +90,7 @@ void show_information_once(TextureBank* texb,const std::string path)
 		temp_timg=*i;
 		std::cerr << "    " << temp_timg->Name << ": " << temp_timg->Width << "x" << temp_timg->Height << " pixels" << std::endl;
 	}
-	
+
 	ever_here=true;
 }
 
@@ -134,7 +136,7 @@ bool parse_timg_path(const std::string& from,std::string* to,bool path_necessary
 {
 	const char* a=from.c_str();
 	const char* b=strchr(a,':');
-	
+
 	if(b)
 	{
 		to[0]=std::string(a,uint32_t(b-a));
@@ -354,7 +356,7 @@ int main(int argc,char* argv[])
 	uint32_t temp_int2=0;
 	uint32_t temp_int3=0;
 	std::vector<uint8_t> rawImage;
-	
+
 	if(SwitchO.isSet())
 		TEXBOutput=SwitchO.getValue();
 	else
@@ -364,7 +366,7 @@ int main(int argc,char* argv[])
 	{
 		std::string timg_n_path[2];
 		char type=CmdLineOrder.at(i);
-		
+
 		if(type=='e')
 		{
 			indexE++;
@@ -467,7 +469,7 @@ int main(int argc,char* argv[])
 					rawImage=std::vector<uint8_t>();
 					continue;
 				}
-				
+
 				std::cerr << "Replace: Replacing " << timg_n_path[0] << " image from " << timg_n_path[1] << std::endl;
 				memcpy(timg->RawImage,&rawImage[0],temp_int2*temp_int3*4);
 			}

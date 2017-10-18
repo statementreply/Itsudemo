@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <cstring>
 
+using namespace TEXB;
+
 TextureBank::TextureBank(uint32_t _Width,uint32_t _Height):Width(RawImageWidth),Height(RawImageHeight),Flags(_Flags)
 {
 	uint32_t rawimage_size=_Width*_Height*4;
@@ -116,7 +118,7 @@ int32_t TextureBank::ReplaceImage(TextureImage* Image,uint32_t Index)
 int32_t TextureBank::DefineImage(const Point* Vertexes,const UVPoint* UVs,std::string Name,uint32_t* Index)
 {
 	if(Index==NULL) return EINVAL;
-	
+
 	TextureImage* timg=new TextureImage();
 	timg->Width=Vertexes[2].X;
 	timg->Height=Vertexes[2].Y;
@@ -135,7 +137,7 @@ int32_t TextureBank::DefineImage(const Point* Vertexes,const UVPoint* UVs,std::s
 		Vertex[i*4+2]=uint32_t(UVs[i].U*65536);
 		Vertex[i*4+3]=uint32_t(UVs[i].V*65536);
 	}
-	
+
 	*Index=ImageList_Id.size();
 	VertexIndexUVs.push_back(Vertex);
 	ImageList_Id.push_back(timg);
