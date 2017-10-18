@@ -1,0 +1,16 @@
+# Itsudemo Makefile for theos.
+
+DEBUG ?= 0
+
+include $(THEOS)/makefiles/common.mk
+
+TOOL_NAME = Itsudemo
+Itsudemo_FILES := $(wildcard src/*.cpp)
+Itsudemo_FILES += $(wildcard zlib-1.2.8/*.c)
+Itsudemo_FILES += lodepng/lodepng.cpp
+Itsudemo_CFLAGS += -Itclap-1.2.1
+Itsudemo_CFLAGS += -Izlib-1.2.8
+Itsudemo_CFLAGS += -Ilodepng
+Itsudemo_CFLAGS += -Wno-error
+
+include $(THEOS_MAKE_PATH)/tool.mk
