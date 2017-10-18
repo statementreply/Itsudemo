@@ -40,138 +40,140 @@
 
 #include <stdint.h>
 
-using namespace TEXB;
+namespace TEXB {
 
-/* implementations dubious? it is not care either way. */
-void copy_1bpp_luma(uint8_t *raw, int len, uint8_t *output) {
-	memset(output, 255, len * 4);
-	for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
-		output[ctr] = raw[i];
-		output[ctr + 1] = raw[i];
-		output[ctr + 2] = raw[i];
-	}
-}
-
-void copy_1bpp_alpha(uint8_t *raw, int len, uint8_t *output) {
-	memset(output, 0, len * 4);
-	for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
-		output[ctr + 3] = raw[i];
-	}
-}
-
-void copy_2bpp_lumalpha(uint8_t *raw, int len, uint8_t *output) {
-	memset(output, 0, len * 4);
-	for (int i = 0, ctr = 0; i < len; ctr = (i += 2) * 4) {
-		output[ctr] = raw[i];
-		output[ctr + 1] = raw[i];
-		output[ctr + 2] = raw[i];
-		output[ctr + 3] = raw[i + 1];
-	}
-}
-
-void copy_2bpp_rgb565(uint8_t *raw, int len, uint8_t *output) {
-	memset(output, 255, len * 4);
-	unsigned short *pixels = (unsigned short *) raw;
-	for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
-		unsigned short pixel = pixels[i];
-		uint8_t shift = (pixel & 0xF800) >> 8;
-		output[ctr] = shift | (shift >> 5);
-		shift = (pixel & 0x07E0) >> 3;
-		output[ctr + 1] = shift | (shift >> 6);
-		shift = (pixel & 0x001F) << 3;
-		output[ctr + 2] = shift | (shift >> 5);
-	}
-}
-
-void copy_2bpp_rgba5551(uint8_t *raw, int len, uint8_t *output) {
-	unsigned short *pixels = (unsigned short *) raw;
-	for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
-		unsigned short pixel = pixels[i];
-		uint8_t shift = (pixel & 0xF800) >> 8;
-		output[ctr] = shift | (shift >> 5);
-		shift = (pixel & 0x07C0) >> 3;
-		output[ctr + 1] = shift | (shift >> 5);
-		shift = (pixel & 0x003E) << 3;
-		output[ctr + 2] = shift | (shift >> 5);
-		output[ctr + 3] = (pixel % 2)? 255 : 0;
-	}
-}
-
-void copy_2bpp_rgba4444(uint8_t *raw, int len, uint8_t *output) {
-	unsigned short *pixels = (unsigned short *) raw;
-	for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
-		unsigned short pixel = pixels[i];
-		uint8_t shift = (pixel & 0xF000) >> 8;
-		output[ctr] = shift | (shift >> 4);
-		shift = (pixel & 0x0F00) >> 4;
-		output[ctr + 1] = shift | (shift >> 4);
-		shift = pixel & 0x00F0;
-		output[ctr + 2] = shift | (shift >> 4);
-		shift = pixel & 0x000F;
-		output[ctr + 3] = shift | (shift << 4);
-	}
-}
-
-void copy_3bpp_rgb(uint8_t *raw, int len, uint8_t *output) {
-	memset(output, 255, len * 4);
-	for (int i = 0, ctr = 0; i < len; ctr = (i += 3) * 4) {
-		output[ctr] = raw[i];
-		output[ctr + 1] = raw[i + 1];
-		output[ctr + 2] = raw[i + 2];
-	}
-}
-
-void convert_map(uint8_t *raw, uint32_t w, uint32_t h, uint16_t texb_flags, uint8_t *output) {
-	uint8_t pix_format=uint8_t(texb_flags)>>6;
-	uint8_t img_format=texb_flags&7;
-	if (pix_format == 3) {
-		switch (img_format) {
-			case 1:
-				copy_1bpp_luma(raw, w * h, output);
-				break;
-			case 0:
-				copy_1bpp_alpha(raw, w * h, output);
-				break;
-			case 2:
-				copy_2bpp_lumalpha(raw, w * h, output);
-				break;
-			case 3:
-				copy_3bpp_rgb(raw, w * h, output);
-				break;
-			default:
-				memcpy(output, raw, w * h * 4);
-				break;
+	/* implementations dubious? it is not care either way. */
+	void copy_1bpp_luma(uint8_t *raw, int len, uint8_t *output) {
+		memset(output, 255, len * 4);
+		for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
+			output[ctr] = raw[i];
+			output[ctr + 1] = raw[i];
+			output[ctr + 2] = raw[i];
 		}
 	}
-	else if(pix_format == 0)
-		copy_2bpp_rgb565(raw, w * h, output);
-	else if(pix_format == 1)
-		copy_2bpp_rgba5551(raw, w * h, output);
-	else if(pix_format == 2)
-		copy_2bpp_rgba4444(raw, w * h, output);
 
-	return;
-}
+	void copy_1bpp_alpha(uint8_t *raw, int len, uint8_t *output) {
+		memset(output, 0, len * 4);
+		for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
+			output[ctr + 3] = raw[i];
+		}
+	}
 
-UVPoint xy2uv(uint32_t x,uint32_t y,Point v0,Point v1,Point v2,Point v3,UVPoint t0,UVPoint t1,UVPoint t2,UVPoint t3)
-{
-	uint32_t xyw=abs(int(
-		std::max(v0.X,std::max(v1.X,std::max(v2.X,v3.X))) -
-		std::min(v0.X,std::min(v1.X,std::min(v2.X,v3.X)))
-	));
-	uint32_t xyh=abs(int(
-		std::max(v0.Y,std::max(v1.Y,std::max(v2.Y,v3.Y))) -
-		std::min(v0.Y,std::min(v1.Y,std::min(v2.Y,v3.Y)))
-	));
-	double atotal=xyw*xyh;
-	double a0 = (x - v0.X) * (y - v0.Y) / atotal;
-	double a1 = (v1.X - x) * (y - v1.Y) / atotal;
-	double a2 = (v2.X - x) * (v2.Y - y) / atotal;
-	double a3 = (x - v3.X) * (v3.Y - y) / atotal;
-	UVPoint ret;
+	void copy_2bpp_lumalpha(uint8_t *raw, int len, uint8_t *output) {
+		memset(output, 0, len * 4);
+		for (int i = 0, ctr = 0; i < len; ctr = (i += 2) * 4) {
+			output[ctr] = raw[i];
+			output[ctr + 1] = raw[i];
+			output[ctr + 2] = raw[i];
+			output[ctr + 3] = raw[i + 1];
+		}
+	}
 
-	ret.U=t2.U * a0 + t3.U * a1 + t0.U * a2 + t1.U * a3;
-	ret.V=t2.V * a0 + t3.V * a1 + t0.V * a2 + t1.V * a3;
+	void copy_2bpp_rgb565(uint8_t *raw, int len, uint8_t *output) {
+		memset(output, 255, len * 4);
+		unsigned short *pixels = (unsigned short *) raw;
+		for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
+			unsigned short pixel = pixels[i];
+			uint8_t shift = (pixel & 0xF800) >> 8;
+			output[ctr] = shift | (shift >> 5);
+			shift = (pixel & 0x07E0) >> 3;
+			output[ctr + 1] = shift | (shift >> 6);
+			shift = (pixel & 0x001F) << 3;
+			output[ctr + 2] = shift | (shift >> 5);
+		}
+	}
 
-	return ret;
+	void copy_2bpp_rgba5551(uint8_t *raw, int len, uint8_t *output) {
+		unsigned short *pixels = (unsigned short *) raw;
+		for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
+			unsigned short pixel = pixels[i];
+			uint8_t shift = (pixel & 0xF800) >> 8;
+			output[ctr] = shift | (shift >> 5);
+			shift = (pixel & 0x07C0) >> 3;
+			output[ctr + 1] = shift | (shift >> 5);
+			shift = (pixel & 0x003E) << 3;
+			output[ctr + 2] = shift | (shift >> 5);
+			output[ctr + 3] = (pixel % 2)? 255 : 0;
+		}
+	}
+
+	void copy_2bpp_rgba4444(uint8_t *raw, int len, uint8_t *output) {
+		unsigned short *pixels = (unsigned short *) raw;
+		for (int i = 0, ctr = 0; i < len; ctr = (++i) * 4) {
+			unsigned short pixel = pixels[i];
+			uint8_t shift = (pixel & 0xF000) >> 8;
+			output[ctr] = shift | (shift >> 4);
+			shift = (pixel & 0x0F00) >> 4;
+			output[ctr + 1] = shift | (shift >> 4);
+			shift = pixel & 0x00F0;
+			output[ctr + 2] = shift | (shift >> 4);
+			shift = pixel & 0x000F;
+			output[ctr + 3] = shift | (shift << 4);
+		}
+	}
+
+	void copy_3bpp_rgb(uint8_t *raw, int len, uint8_t *output) {
+		memset(output, 255, len * 4);
+		for (int i = 0, ctr = 0; i < len; ctr = (i += 3) * 4) {
+			output[ctr] = raw[i];
+			output[ctr + 1] = raw[i + 1];
+			output[ctr + 2] = raw[i + 2];
+		}
+	}
+
+	void convert_map(uint8_t *raw, uint32_t w, uint32_t h, uint16_t texb_flags, uint8_t *output) {
+		uint8_t pix_format=uint8_t(texb_flags)>>6;
+		uint8_t img_format=texb_flags&7;
+		if (pix_format == 3) {
+			switch (img_format) {
+				case 1:
+					copy_1bpp_luma(raw, w * h, output);
+					break;
+				case 0:
+					copy_1bpp_alpha(raw, w * h, output);
+					break;
+				case 2:
+					copy_2bpp_lumalpha(raw, w * h, output);
+					break;
+				case 3:
+					copy_3bpp_rgb(raw, w * h, output);
+					break;
+				default:
+					memcpy(output, raw, w * h * 4);
+					break;
+			}
+		}
+		else if(pix_format == 0)
+			copy_2bpp_rgb565(raw, w * h, output);
+		else if(pix_format == 1)
+			copy_2bpp_rgba5551(raw, w * h, output);
+		else if(pix_format == 2)
+			copy_2bpp_rgba4444(raw, w * h, output);
+
+		return;
+	}
+
+	UVPoint xy2uv(uint32_t x,uint32_t y,Point v0,Point v1,Point v2,Point v3,UVPoint t0,UVPoint t1,UVPoint t2,UVPoint t3)
+	{
+		uint32_t xyw=abs(int(
+			std::max(v0.X,std::max(v1.X,std::max(v2.X,v3.X))) -
+			std::min(v0.X,std::min(v1.X,std::min(v2.X,v3.X)))
+		));
+		uint32_t xyh=abs(int(
+			std::max(v0.Y,std::max(v1.Y,std::max(v2.Y,v3.Y))) -
+			std::min(v0.Y,std::min(v1.Y,std::min(v2.Y,v3.Y)))
+		));
+		double atotal=xyw*xyh;
+		double a0 = (x - v0.X) * (y - v0.Y) / atotal;
+		double a1 = (v1.X - x) * (y - v1.Y) / atotal;
+		double a2 = (v2.X - x) * (v2.Y - y) / atotal;
+		double a3 = (x - v3.X) * (v3.Y - y) / atotal;
+		UVPoint ret;
+
+		ret.U=t2.U * a0 + t3.U * a1 + t0.U * a2 + t1.U * a3;
+		ret.V=t2.V * a0 + t3.V * a1 + t0.V * a2 + t1.V * a3;
+
+		return ret;
+	}
+
 }
